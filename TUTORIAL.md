@@ -86,4 +86,31 @@ After a successful build on GitHub:
 3. Scroll down to the **Artifacts** section.
 4. Click on `app-debug` to download the zip file containing your APK.
 
+## 5. Android Configuration Explained (Interview Prep)
+
+For a DevOps role involving mobile apps, understanding how the Android build system is configured is crucial. Here are the key files and concepts:
+
+### 1. `app/build.gradle`
+This is the build configuration for your specific app module.
+- **`compileSdk`**: The Android SDK version used to compile the code (e.g., `34`). *DevOps Note: Your Docker image must have this specific SDK platform installed.*
+- **`minSdk`**: The minimum Android version the app supports.
+- **`targetSdk`**: The version the app is tested against.
+- **`versionCode`**: An integer used by the Play Store to track updates. *DevOps Note: CI pipelines often auto-increment this.*
+- **`versionName`**: The user-visible version string (e.g., "1.0").
+
+### 2. `gradle.properties`
+Project-wide configuration settings for the Gradle build system.
+- **`android.useAndroidX=true`**: Required for modern Android libraries.
+- **`org.gradle.jvmargs`**: Sets JVM memory for the build daemon. *DevOps Note: Important for preventing OOM (Out of Memory) errors in CI containers.*
+
+### 3. `AndroidManifest.xml`
+The manifest describes essential information about the app to the Android build tools, the Android OS, and Google Play.
+- **`package`**: Unique ID for the app.
+- **Permissions**: e.g., `<uses-permission android:name="android.permission.INTERNET" />`.
+- **Activities**: Defines the screens of your app (`MainActivity`).
+
+### 4. SDK Location
+- **Local Development**: Typically defined in `local.properties` (which is git-ignored).
+- **CI/Docker**: Defined using the `ANDROID_HOME` environment variable. This is why we set `ENV ANDROID_HOME` in the Dockerfile.
+
 ## Conclusion
