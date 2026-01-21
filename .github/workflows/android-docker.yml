@@ -25,3 +25,9 @@ jobs:
           -w /app \
           android-ci \
           bash -c "chmod +x gradlew && ./gradlew build"
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-debug
+        path: app/build/outputs/apk/debug/app-debug.apk
