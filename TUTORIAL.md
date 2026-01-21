@@ -1,0 +1,79 @@
+# Tutorial: Android GitHub Actions in Docker
+
+This tutorial guides you through setting up a CI/CD pipeline for your Android application using GitHub Actions and Docker. This ensures a consistent build environment and automates your build process.
+
+## Prerequisites
+
+- An Android project (already set up in this repository).
+- Docker installed on your development machine (for local testing).
+- A GitHub repository.
+
+## 1. The Docker Build Environment
+
+We use a `Dockerfile` to define an immutable build environment. This container includes:
+- **OpenJDK 17**: The Java version required by the Gradle build.
+- **Android Command Line Tools**: Necessary for managing the Android SDK.
+- **Android SDK Components**: Specifically `platforms;android-34` and `build-tools;34.0.0` as defined in `app/build.gradle`.
+
+### Key Dockerfile Sections
+
+```dockerfile
+# Base image
+FROM openjdk:17-jdk-slim
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y curl unzip git ...
+
+# Download Command Line Tools
+RUN curl -o cmdline-tools.zip ...
+
+# Install SDK Packages
+RUN sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+```
+
+## 2. GitHub Actions Workflow
+
+The workflow is defined in `.github/workflows/android-docker.yml`. It triggers on pushes and pull requests to the `main` branch.
+
+### Workflow Breakdown
+
+1.  **Checkout Code**: Retrieves your project source code.
+2.  **Build Docker Image**: Builds the container defined in your `Dockerfile`.
+3.  **Run Build**: Mounts the project source code into the container and runs `./gradlew build`.
+
+```yaml
+    - name: Run Gradle Build in Docker
+      run: |
+        docker run --rm \
+          -v ${{ github.workspace }}:/app \
+          -w /app \
+          android-ci \
+          ./gradlew build
+```
+
+## 3. Running Locally
+
+You can test the build environment locally using Docker before pushing to GitHub.
+
+### Step 1: Build the Image
+
+```bash
+docker build -t android-ci .
+```
+
+### Step 2: Run the Build
+
+```bash
+docker run --rm -v $(pwd):/app -w /app android-ci ./gradlew assembleDebug
+```
+
+This command:
+- `--rm`: Removes the container after it exits.
+- `-v $(pwd):/app`: Maps your current directory to `/app` inside the container.
+- `-w /app`: Sets the working directory to `/app`.
+- `android-ci`: Uses the image you just built.
+- `./gradlew assembleDebug`: Runs the Gradle task to build the debug APK.
+
+## Conclusion
+
+By containerizing your build environment, you eliminate "it works on my machine" issues and simplify your CI configuration. This setup forms the foundation for more advanced pipelines, including running tests and deploying to the Play Store.
