@@ -24,4 +24,4 @@ jobs:
           -v ${{ github.workspace }}:/app \
           -w /app \
           android-ci \
-          ./gradlew build
+          bash -c "chmod +x gradlew && ./gradlew build"
