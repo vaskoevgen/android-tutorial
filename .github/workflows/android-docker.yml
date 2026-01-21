@@ -15,19 +15,32 @@ jobs:
     - name: Build Docker Image
       run: docker build -t android-ci .
       
+    - name: Determine Build Target
+      id: target
+      run: |
+        if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+          echo "TASK=assembleRelease" >> $GITHUB_OUTPUT
+          echo "APK_PATH=app/build/outputs/apk/release/app-release-unsigned.apk" >> $GITHUB_OUTPUT
+          echo "ARTIFACT_NAME=app-release" >> $GITHUB_OUTPUT
+        else
+          echo "TASK=assembleDebug" >> $GITHUB_OUTPUT
+          echo "APK_PATH=app/build/outputs/apk/debug/app-debug.apk" >> $GITHUB_OUTPUT
+          echo "ARTIFACT_NAME=app-debug" >> $GITHUB_OUTPUT
+        fi
+
     - name: Run Gradle Build in Docker
       # Mount current directory to /app
       # Use the image built in previous step
-      # Run './gradlew build'
+      # Run './gradlew <task>'
       run: |
         docker run --rm \
           -v ${{ github.workspace }}:/app \
           -w /app \
           android-ci \
-          bash -c "chmod +x gradlew && ./gradlew build"
+          bash -c "chmod +x gradlew && ./gradlew ${{ steps.target.outputs.TASK }}"
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: app-debug
-        path: app/build/outputs/apk/debug/app-debug.apk
+        name: ${{ steps.target.outputs.ARTIFACT_NAME }}
+        path: ${{ steps.target.outputs.APK_PATH }}
