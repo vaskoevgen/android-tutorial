@@ -77,3 +77,13 @@ This command:
 ## Conclusion
 
 By containerizing your build environment, you eliminate "it works on my machine" issues and simplify your CI configuration. This setup forms the foundation for more advanced pipelines, including running tests and deploying to the Play Store.
+
+## 4. Downloading Artifacts
+
+After a successful build on GitHub:
+1. Go to the **Actions** tab in your repository.
+2. Click on the specific workflow run.
+3. Scroll down to the **Artifacts** section.
+4. Click on `app-debug` to download the zip file containing your APK.
+
+## Conclusion
