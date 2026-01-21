@@ -28,6 +28,13 @@ RUN mkdir -p ${ANDROID_HOME}/cmdline-tools \
 # Accept licenses
 RUN yes | sdkmanager --licenses
 
+# Install Gradle 8.2
+RUN curl -L https://services.gradle.org/distributions/gradle-8.2-bin.zip -o gradle.zip \
+    && unzip gradle.zip -d /opt \
+    && rm gradle.zip \
+    && mv /opt/gradle-8.2 /opt/gradle
+ENV PATH ${PATH}:/opt/gradle/bin
+
 # Install SDK packages
 # Based on build.gradle: compileSdk 34, minSdk 24
 RUN sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
